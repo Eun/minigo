@@ -1,0 +1,7 @@
+package main
+
+import "github.com/Eun/minigo/test/tests/normal/import/world"
+
+func main() {
+	fmt.Printf("Hello %s\n", world.World())
+}

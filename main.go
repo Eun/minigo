@@ -29,7 +29,9 @@ func main() {
 	kingpin.Version(fmt.Sprintf("%s %s %s", version, commit, date))
 	kingpin.Parse()
 
-	t := yaegi_template.MustNew(interp.Options{}, stdlib.Symbols)
+	t := yaegi_template.MustNew(interp.Options{
+		GoPath: os.Getenv("GOPATH"),
+	}, stdlib.Symbols)
 	if !*templatingFlag {
 		t.StartTokens = []rune{}
 		t.EndTokens = []rune{}
