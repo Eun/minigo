@@ -1,0 +1,3 @@
+#!/usr/bin/env minigo
+import "github.com/Eun/minigo/test/tests/shebang/import/world"
+fmt.Printf("Hello %s\n", world.World())

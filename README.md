@@ -1,5 +1,5 @@
 # minigo
-A mini golang interpreter based on [yaegi](https://github.com/containous/yaegi).
+A mini golang interpreter based on [yaegi-template](https://github.com/Eun/yaegi-template) and [yaegi](https://github.com/containous/yaegi).
 
 
 ## Usage
@@ -14,7 +14,6 @@ fmt.Println("Hello World")
 Download and install from the [Relases Page](https://github.com/Eun/minigo/releases).
 Or compile it yourself using `go`
 
-
-
-## Imports
-You can import custom packages, however, this requires you to download them and setup the `GOROOT` environment variable accordingly.
+## Importing
+You can import other packages by specifying `$GOPATH` and placing them in `$GOPATH/src`.  
+However [yaegi](https://github.com/containous/yaegi) is (currently) limited in functionality so don't expect all packages are working.
