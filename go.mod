@@ -1,6 +1,6 @@
 module github.com/Eun/minigo
 
-go 1.12
+go 1.14
 
 require (
 	github.com/Eun/yaegi-template v1.3.2
