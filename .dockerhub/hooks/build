@@ -1,0 +1,2 @@
+#!/bin/bash
+docker build -t $IMAGE_NAME -f $DOCKERFILE_PATH --build-arg SOURCE_BRANCH=$SOURCE_BRANCH --build-arg SOURCE_COMMIT=$SOURCE_COMMIT ../
