@@ -63,7 +63,7 @@ func (interp *Interpreter) gta(root *node, rpath, pkgID string) ([]*node, error)
 					}
 					val = src.rval
 				}
-				if typ.incomplete {
+				if !typ.isComplete() {
 					// Come back when type is known.
 					revisit = append(revisit, n)
 					return false
@@ -73,7 +73,7 @@ func (interp *Interpreter) gta(root *node, rpath, pkgID string) ([]*node, error)
 					return false
 				}
 				if typ.isBinMethod {
-					typ = &itype{cat: valueT, rtype: typ.methodCallType(), isBinMethod: true}
+					typ = &itype{cat: valueT, rtype: typ.methodCallType(), isBinMethod: true, scope: sc}
 				}
 				if sc.sym[dest.ident] == nil {
 					sc.sym[dest.ident] = &symbol{kind: varSym, global: true, index: sc.add(typ), typ: typ, rval: val}
@@ -94,7 +94,7 @@ func (interp *Interpreter) gta(root *node, rpath, pkgID string) ([]*node, error)
 				if n.typ, err = nodeType(interp, sc, n.child[l]); err != nil {
 					return false
 				}
-				if n.typ.incomplete {
+				if !n.typ.isComplete() {
 					// Come back when type is known.
 					revisit = append(revisit, n)
 					return false
@@ -139,7 +139,7 @@ func (interp *Interpreter) gta(root *node, rpath, pkgID string) ([]*node, error)
 				// Add a function symbol in the package name space
 				sc.sym[n.child[1].ident] = &symbol{kind: funcSym, typ: n.typ, node: n, index: -1}
 			}
-			if n.typ.incomplete {
+			if !n.typ.isComplete() {
 				revisit = append(revisit, n)
 			}
 			return false
@@ -163,10 +163,10 @@ func (interp *Interpreter) gta(root *node, rpath, pkgID string) ([]*node, error)
 						if isBinType(v) {
 							typ = typ.Elem()
 						}
-						sc.sym[n] = &symbol{kind: binSym, typ: &itype{cat: valueT, rtype: typ}, rval: v}
+						sc.sym[n] = &symbol{kind: binSym, typ: &itype{cat: valueT, rtype: typ, scope: sc}, rval: v}
 					}
 				default: // import symbols in package namespace
-					sc.sym[name] = &symbol{kind: pkgSym, typ: &itype{cat: binPkgT, path: ipath}}
+					sc.sym[name] = &symbol{kind: pkgSym, typ: &itype{cat: binPkgT, path: ipath, scope: sc}}
 				}
 			} else if err = interp.importSrc(rpath, ipath); err == nil {
 				sc.types = interp.universe.types
@@ -179,7 +179,7 @@ func (interp *Interpreter) gta(root *node, rpath, pkgID string) ([]*node, error)
 						}
 					}
 				default: // import symbols in package namespace
-					sc.sym[name] = &symbol{kind: pkgSym, typ: &itype{cat: srcPkgT, path: ipath}}
+					sc.sym[name] = &symbol{kind: pkgSym, typ: &itype{cat: srcPkgT, path: ipath, scope: sc}}
 				}
 			} else {
 				err = n.cfgErrorf("import %q error: %v", ipath, err)
@@ -192,7 +192,7 @@ func (interp *Interpreter) gta(root *node, rpath, pkgID string) ([]*node, error)
 				return false
 			}
 			if n.child[1].kind == identExpr {
-				n.typ = &itype{cat: aliasT, val: typ, name: typeName, path: rpath, field: typ.field, incomplete: typ.incomplete}
+				n.typ = &itype{cat: aliasT, val: typ, name: typeName, path: rpath, field: typ.field, incomplete: typ.incomplete, scope: sc}
 				copy(n.typ.method, typ.method)
 			} else {
 				n.typ = typ
@@ -206,7 +206,7 @@ func (interp *Interpreter) gta(root *node, rpath, pkgID string) ([]*node, error)
 				n.typ.method = append(n.typ.method, sc.sym[typeName].typ.method...)
 			}
 			sc.sym[typeName].typ = n.typ
-			if n.typ.incomplete {
+			if !n.typ.isComplete() {
 				revisit = append(revisit, n)
 			}
 			return false

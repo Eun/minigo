@@ -121,30 +121,33 @@ func runCfg(n *node, f *frame) {
 }
 
 func typeAssertStatus(n *node) {
-	value := genValue(n.child[0])      // input value
+	c0, c1 := n.child[0], n.child[1]
+	value := genValue(c0)              // input value
 	value1 := genValue(n.anc.child[1]) // returned status
+	typ := c1.typ.rtype                // type to assert
 	next := getExec(n.tnext)
 
 	switch {
-	case n.child[0].typ.cat == valueT:
+	case c0.typ.cat == valueT:
 		n.exec = func(f *frame) bltn {
-			if !value(f).IsValid() || value(f).IsNil() {
+			v := value(f)
+			if !v.IsValid() || v.IsNil() {
 				value1(f).SetBool(false)
 			}
-			value1(f).SetBool(true)
+			value1(f).SetBool(v.Type().Implements(typ))
 			return next
 		}
-	case n.child[1].typ.cat == interfaceT:
+	case c1.typ.cat == interfaceT:
 		n.exec = func(f *frame) bltn {
 			_, ok := value(f).Interface().(valueInterface)
-			//value0(f).Set(reflect.ValueOf(valueInterface{v.node, v.value}))
+			// TODO: verify that value(f) implements asserted type.
 			value1(f).SetBool(ok)
 			return next
 		}
 	default:
 		n.exec = func(f *frame) bltn {
 			_, ok := value(f).Interface().(valueInterface)
-			//value0(f).Set(v.value)
+			// TODO: verify that value(f) implements asserted type.
 			value1(f).SetBool(ok)
 			return next
 		}
@@ -152,25 +155,29 @@ func typeAssertStatus(n *node) {
 }
 
 func typeAssert(n *node) {
-	value := genValue(n.child[0]) // input value
-	dest := genValue(n)           // returned result
+	c0, c1 := n.child[0], n.child[1]
+	value := genValue(c0) // input value
+	dest := genValue(n)   // returned result
 	next := getExec(n.tnext)
 
 	switch {
-	case n.child[0].typ.cat == valueT:
+	case c0.typ.cat == valueT:
 		n.exec = func(f *frame) bltn {
-			dest(f).Set(value(f).Elem())
+			v := value(f)
+			dest(f).Set(v.Elem())
 			return next
 		}
-	case n.child[1].typ.cat == interfaceT:
+	case c1.typ.cat == interfaceT:
 		n.exec = func(f *frame) bltn {
 			v := value(f).Interface().(valueInterface)
+			// TODO: verify that value(f) implements asserted type.
 			dest(f).Set(reflect.ValueOf(valueInterface{v.node, v.value}))
 			return next
 		}
 	default:
 		n.exec = func(f *frame) bltn {
 			v := value(f).Interface().(valueInterface)
+			// TODO: verify that value(f) implements asserted type.
 			dest(f).Set(v.value)
 			return next
 		}
@@ -195,6 +202,7 @@ func typeAssert2(n *node) {
 	case n.child[1].typ.cat == interfaceT:
 		n.exec = func(f *frame) bltn {
 			v, ok := value(f).Interface().(valueInterface)
+			// TODO: verify that value(f) implements asserted type.
 			value0(f).Set(reflect.ValueOf(valueInterface{v.node, v.value}))
 			value1(f).SetBool(ok)
 			return next
@@ -202,6 +210,7 @@ func typeAssert2(n *node) {
 	default:
 		n.exec = func(f *frame) bltn {
 			v, ok := value(f).Interface().(valueInterface)
+			// TODO: verify that value(f) implements asserted type.
 			value0(f).Set(v.value)
 			value1(f).SetBool(ok)
 			return next
@@ -493,12 +502,13 @@ func genFunctionWrapper(n *node) func(*frame) reflect.Value {
 			rcvr = genValueRecv(n)
 		}
 	}
+	funcType := n.typ.TypeOf()
 
 	return func(f *frame) reflect.Value {
 		if n.frame != nil { // Use closure context if defined
 			f = n.frame
 		}
-		return reflect.MakeFunc(n.typ.TypeOf(), func(in []reflect.Value) []reflect.Value {
+		return reflect.MakeFunc(funcType, func(in []reflect.Value) []reflect.Value {
 			// Allocate and init local frame. All values to be settable and addressable.
 			fr := newFrame(f, len(def.types), f.runid())
 			d := fr.data
@@ -571,17 +581,22 @@ func genInterfaceWrapper(n *node, typ reflect.Type) func(*frame) reflect.Value {
 
 	return func(f *frame) reflect.Value {
 		v := value(f)
+		vv := v
 		switch v.Kind() {
 		case reflect.Chan, reflect.Func, reflect.Interface, reflect.Map, reflect.Ptr, reflect.Slice:
 			if v.IsNil() {
 				return reflect.New(typ).Elem()
 			}
+			if v.Kind() == reflect.Ptr {
+				vv = v.Elem()
+			}
 		}
 		w := reflect.New(wrap).Elem()
 		for i, m := range methods {
 			if m == nil {
-				if r := v.FieldByIndex(indexes[i]).MethodByName(names[i]); r.IsValid() {
-					w.Field(i).Set(v.FieldByIndex(indexes[i]).MethodByName(names[i]))
+				o := vv.FieldByIndex(indexes[i])
+				if r := o.MethodByName(names[i]); r.IsValid() {
+					w.Field(i).Set(o.MethodByName(names[i]))
 				} else {
 					log.Println(n.cfgErrorf("genInterfaceWrapper error, no method %s", names[i]))
 				}
@@ -1565,11 +1580,19 @@ func arrayLit(n *node) {
 	for i, c := range child {
 		if c.kind == keyValueExpr {
 			convertLiteralValue(c.child[1], rtype)
-			values[i] = genValue(c.child[1])
+			if n.typ.val.cat == interfaceT {
+				values[i] = genValueInterface(c.child[1])
+			} else {
+				values[i] = genValue(c.child[1])
+			}
 			index[i] = int(vInt(c.child[0].rval))
 		} else {
 			convertLiteralValue(c, rtype)
-			values[i] = genValue(c)
+			if n.typ.val.cat == interfaceT {
+				values[i] = genValueInterface(c)
+			} else {
+				values[i] = genValue(c)
+			}
 			index[i] = prev
 		}
 		prev = index[i] + 1
@@ -1578,14 +1601,14 @@ func arrayLit(n *node) {
 		}
 	}
 
-	var a reflect.Value
-	if n.typ.sizedef {
-		a, _ = n.typ.zero()
-	} else {
-		a = reflect.MakeSlice(n.typ.TypeOf(), max, max)
-	}
-
+	typ := n.typ.frameType()
 	n.exec = func(f *frame) bltn {
+		var a reflect.Value
+		if n.typ.sizedef {
+			a, _ = n.typ.zero()
+		} else {
+			a = reflect.MakeSlice(typ, max, max)
+		}
 		for i, v := range values {
 			a.Index(index[i]).Set(v(f))
 		}
@@ -1607,8 +1630,16 @@ func mapLit(n *node) {
 	for i, c := range child {
 		convertLiteralValue(c.child[0], n.typ.key.TypeOf())
 		convertLiteralValue(c.child[1], n.typ.val.TypeOf())
-		keys[i] = genValue(c.child[0])
-		values[i] = genValue(c.child[1])
+		if n.typ.key.cat == interfaceT {
+			keys[i] = genValueInterface(c.child[0])
+		} else {
+			keys[i] = genValue(c.child[0])
+		}
+		if n.typ.val.cat == interfaceT {
+			values[i] = genValueInterface(c.child[1])
+		} else {
+			values[i] = genValue(c.child[1])
+		}
 	}
 
 	n.exec = func(f *frame) bltn {
@@ -1717,6 +1748,7 @@ func doCompositeLit(n *node, hasType bool) {
 		}
 	}
 
+	i := n.findex
 	n.exec = func(f *frame) bltn {
 		a := reflect.New(n.typ.TypeOf()).Elem()
 		for i, v := range values {
@@ -1728,7 +1760,7 @@ func doCompositeLit(n *node, hasType bool) {
 		case destInterface:
 			d.Set(reflect.ValueOf(valueInterface{n, a}))
 		default:
-			d.Set(a)
+			f.data[i] = a
 		}
 		return next
 	}
@@ -2484,7 +2516,9 @@ func _select(n *node) {
 	cases := make([]reflect.SelectCase, nbClause+1)
 
 	for i := 0; i < nbClause; i++ {
-		if len(n.child[i].child) > 1 {
+		switch c0 := n.child[i].child[0]; {
+		case len(n.child[i].child) > 1:
+			// The comm clause contains a channel operation and a clause body.
 			clause[i] = getExec(n.child[i].child[1].start)
 			chans[i], assigned[i], ok[i], cases[i].Dir = clauseChanDir(n.child[i])
 			chanValues[i] = genValue(chans[i])
@@ -2494,8 +2528,18 @@ func _select(n *node) {
 			if ok[i] != nil {
 				okValues[i] = genValue(ok[i])
 			}
-		} else {
-			clause[i] = getExec(n.child[i].child[0].start)
+		case c0.kind == exprStmt && len(c0.child) == 1 && c0.child[0].action == aRecv:
+			// The comm clause has an empty body clause after channel receive.
+			chanValues[i] = genValue(c0.child[0].child[0])
+			cases[i].Dir = reflect.SelectRecv
+		case c0.kind == sendStmt:
+			// The comm clause as an empty body clause after channel send.
+			chanValues[i] = genValue(c0.child[0])
+			cases[i].Dir = reflect.SelectSend
+			assignedValues[i] = genValue(c0.child[1])
+		default:
+			// The comm clause has a default clause.
+			clause[i] = getExec(c0.start)
 			cases[i].Dir = reflect.SelectDefault
 		}
 	}
