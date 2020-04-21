@@ -17,6 +17,7 @@ import (
 
 var (
 	templatingFlag = kingpin.Flag("template", "enable templating").Short('t').Bool()
+	writeToFile    = kingpin.Flag("out", "write output to file").Short('o').String()
 	goFilesArg     = kingpin.Arg("go file", ".go file to run").Strings()
 )
 
@@ -42,6 +43,17 @@ func main() {
 		return
 	}
 
+	var w io.Writer = os.Stdout
+	if writeToFile != nil && *writeToFile != "" {
+		f, err := os.Create(*writeToFile)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "unable to write file `%s': %v\n", *writeToFile, err)
+			os.Exit(1)
+		}
+		defer f.Close()
+		w = f
+	}
+
 	for _, file := range *goFilesArg {
 		f, err := os.Open(file)
 		if err != nil {
@@ -61,7 +73,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		if _, err = t.Exec(os.Stdout, nil); err != nil {
+		if _, err = t.Exec(w, nil); err != nil {
 			_ = f.Close()
 			fmt.Fprintf(os.Stderr, "unable to exec file `%s': %v\n", file, err)
 			os.Exit(1)
