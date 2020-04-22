@@ -19,13 +19,88 @@ func structEqual(a, b interface{}) bool {
 
 	for i := 0; i < sta.Type().NumField(); i++ {
 		fa := sta.Type().Field(i)
-		fb := sta.FieldByName(fa.Name)
+		fb := stb.FieldByName(fa.Name)
+		if !fb.IsValid() {
+			return false
+		}
 
 		if !cmp.Equal(sta.Field(i).Interface(), fb.Interface()) {
 			return false
 		}
 	}
 	return true
+}
+
+func TestStructEqual(t *testing.T) {
+	tests := []struct {
+		a    interface{}
+		b    interface{}
+		want bool
+	}{
+		{
+			&struct {
+				Name string
+			}{
+				Name: "Joe",
+			},
+			&struct {
+				Name string
+			}{
+				Name: "Joe",
+			},
+			true,
+		},
+		{
+			&struct {
+				Name string
+			}{
+				Name: "Alice",
+			},
+			&struct {
+				Name string
+			}{
+				Name: "Joe",
+			},
+			false,
+		},
+		{
+			&struct {
+				Id int
+			}{
+				Id: 10,
+			},
+			&struct {
+				Name string
+			}{
+				Name: "Joe",
+			},
+			false,
+		},
+
+		{
+			&struct {
+				Id   int
+				Name string
+			}{
+				Id:   10,
+				Name: "Joe",
+			},
+			&struct {
+				Name string
+			}{
+				Name: "Joe",
+			},
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run("", func(t *testing.T) {
+			got := structEqual(tt.a, tt.b)
+			if got != tt.want {
+				t.Errorf("structEqual() got %v want %v", got, tt.want)
+			}
+		})
+	}
 }
 
 func TestConvertMapToStruct(t *testing.T) {
@@ -49,22 +124,30 @@ func TestConvertMapToStruct(t *testing.T) {
 		},
 		{
 			"slice",
-			map[string]interface{}{"Roles": []string{"Admin", "Developer"}},
+			map[string]interface{}{"Name": "Joe", "Id": 10, "Roles": []string{"Admin", "Developer"}},
 			&struct {
+				Id    int
+				Name  string
 				Roles []string
 			}{
+				Id:    10,
+				Name:  "Joe",
 				Roles: []string{"Admin", "Developer"},
 			},
 			false,
 		},
 		{
 			"nested",
-			map[string]interface{}{"Details": map[string]interface{}{"Country": "US"}},
+			map[string]interface{}{"Name": "Joe", "Id": 10, "Details": map[string]interface{}{"Country": "US"}},
 			&struct {
+				Id      int
+				Name    string
 				Details struct {
 					Country string
 				}
 			}{
+				Id:   10,
+				Name: "Joe",
 				Details: struct {
 					Country string
 				}{
