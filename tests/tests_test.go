@@ -47,7 +47,7 @@ func TestImport(t *testing.T) {
 		struct{ Name string }{"Joe"},
 		`package main
 
-import "github.com/Eun/minigo/tests/world"
+import "./world"
 
 func main() {
 	fmt.Printf("Hello %s's %s\n", context.Name, world.World())
