@@ -18,15 +18,18 @@ import (
 	"golang.org/x/xerrors"
 )
 
+// Config holds configuration values for Minigo
 type Config struct {
 	TemplateMode bool
 }
 
+// Minigo can be used to run .go files
 type Minigo struct {
 	t      *yaegi_template.Template
 	config Config
 }
 
+// New creates a new Minigo instance
 func New(config Config) (*Minigo, error) {
 	t, err := yaegi_template.New(interp.Options{
 		GoPath: os.Getenv("GOPATH"),
@@ -44,6 +47,7 @@ func New(config Config) (*Minigo, error) {
 	}, nil
 }
 
+// Run runs the go interpreter on src and writes the output to output
 func (minigo *Minigo) Run(src io.ReadSeeker, context interface{}, output io.Writer) error {
 	t := yaegi_template.MustNew(interp.Options{
 		GoPath: os.Getenv("GOPATH"),
@@ -97,6 +101,7 @@ func skipShebang(rws io.ReadSeeker) error {
 	return err
 }
 
+// ConvertMapToStruct converts a map into a struct representation
 func ConvertMapToStruct(v map[string]interface{}) (interface{}, error) {
 	if v == nil {
 		return nil, nil

@@ -11,6 +11,7 @@ import (
 	"github.com/Eun/minigo/minigo"
 	"github.com/hjson/hjson-go"
 	"github.com/spf13/cobra"
+	"golang.org/x/xerrors"
 )
 
 var (
@@ -19,7 +20,7 @@ var (
 		Short: "A mini golang interpreter",
 		Long: `A mini golang interpreter based on yaegi-template and yaegi.
 https://github.com/Eun/minigo`,
-		Run:  run,
+		RunE: run,
 		Args: cobra.MinimumNArgs(1),
 	}
 
@@ -28,85 +29,85 @@ https://github.com/Eun/minigo`,
 	contextFlag    string
 )
 
-func Version(version string) {
-	rootCmd.Version = version
-}
-
 func init() {
 	rootCmd.Flags().BoolVarP(&templatingFlag, "template", "t", false, "enable templating")
 	rootCmd.Flags().StringVarP(&writeToFlag, "out", "o", "", "write output to file")
 	rootCmd.Flags().StringVarP(&contextFlag, "context", "c", "", "set context to the specified json object")
 }
 
+// Execute executes the root cmd
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		_, _ = fmt.Fprint(os.Stderr, err.Error())
 		os.Exit(1)
 	}
 }
 
-func run(cmd *cobra.Command, args []string) {
+// Version sets the rootCmd version to the specified value
+func Version(version string) {
+	rootCmd.Version = version
+}
+
+func run(cmd *cobra.Command, args []string) error {
 	var w io.Writer = os.Stdout
 	if writeToFlag != "" {
 		f, err := os.Create(writeToFlag)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "unable to write file `%s': %v\n", writeToFlag, err)
-			os.Exit(1)
+			return xerrors.Errorf("unable to write file `%s': %w\n", writeToFlag, err)
 		}
 		defer f.Close()
 		w = f
 	}
 
-	context := makeContext()
+	context, err := makeContext()
+	if err != nil {
+		return err
+	}
 
 	amountOfGoFiles := len(args)
 	if amountOfGoFiles <= 0 {
-		return
+		return nil
 	}
 
 	g, err := minigo.New(minigo.Config{
 		TemplateMode: templatingFlag,
 	})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "unable to create minigo instance: %v\n", err)
-		os.Exit(1)
+		return xerrors.Errorf("unable to create minigo instance: %w", err)
 	}
 
 	for _, s := range args {
 		f, err := os.Open(s)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "unable to open file `%s': %v\n", s, err)
-			os.Exit(1)
+			return xerrors.Errorf("unable to open file `%s': %v", s, err)
 		}
 		err = g.Run(f, context, w)
 		_ = f.Close()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "unable to exec file `%s': %v\n", s, err)
-			os.Exit(1)
+			return xerrors.Errorf("unable to exec file `%s': %v", s, err)
 		}
 	}
+	return nil
 }
 
-func makeContext() interface{} {
+func makeContext() (interface{}, error) {
 	if contextFlag == "" {
-		return nil
+		return nil, nil
 	}
 
 	contextFlag = strings.TrimFunc(contextFlag, func(r rune) bool {
 		return unicode.IsSpace(r) || r == '\'' || r == '"'
 	})
 	if contextFlag == "" {
-		return nil
+		return nil, nil
 	}
 	var dat map[string]interface{}
 	if err := hjson.Unmarshal([]byte(contextFlag), &dat); err != nil {
-		fmt.Fprintf(os.Stderr, "unable to decode context `%s': %v\n", contextFlag, err)
-		os.Exit(1)
+		return nil, xerrors.Errorf("unable to decode context `%s': %w", contextFlag, err)
 	}
 	context, err := minigo.ConvertMapToStruct(dat)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "unable to convert context map to struct `%s': %v\n", contextFlag, err)
-		os.Exit(1)
+		return nil, xerrors.Errorf("unable to convert context map to struct `%s': %w", contextFlag, err)
 	}
-	return context
+	return context, nil
 }
