@@ -1,2 +1,0 @@
-#!/usr/bin/env minigo
-fmt.Println("Hello World")
