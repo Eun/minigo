@@ -112,10 +112,6 @@ func ConvertMapToStruct(v map[string]interface{}) (interface{}, error) {
 		return nil, xerrors.Errorf("%#v is invalid", v)
 	}
 
-	keyName := func(s string) string {
-		return strings.ToUpper(s[:1]) + s[1:]
-	}
-
 	instance := dynamicstruct.NewStruct()
 
 	type KeyValue struct {
@@ -143,7 +139,7 @@ func ConvertMapToStruct(v map[string]interface{}) (interface{}, error) {
 		}
 
 		collectedKeys[i] = KeyValue{
-			Name:  keyName(key.String()),
+			Name:  strings.Title(key.String()),
 			Value: value.Elem(),
 		}
 	}
