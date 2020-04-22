@@ -7,7 +7,7 @@ import (
 )
 
 func TestSimple(t *testing.T) {
-	RunTest(t,
+	runTest(t,
 		minigo.Config{
 			TemplateMode: false,
 		},
@@ -18,7 +18,7 @@ func TestSimple(t *testing.T) {
 }
 
 func TestAdvanced(t *testing.T) {
-	RunTest(t,
+	runTest(t,
 		minigo.Config{
 			TemplateMode: false,
 		},
@@ -40,7 +40,7 @@ func main() {
 }
 
 func TestImport(t *testing.T) {
-	RunTest(t,
+	runTest(t,
 		minigo.Config{
 			TemplateMode: false,
 		},
@@ -58,7 +58,7 @@ func main() {
 }
 
 func TestTemplate(t *testing.T) {
-	RunTest(t,
+	runTest(t,
 		minigo.Config{
 			TemplateMode: true,
 		},
@@ -69,7 +69,7 @@ func TestTemplate(t *testing.T) {
 }
 
 func TestShebangSkip(t *testing.T) {
-	RunTest(t,
+	runTest(t,
 		minigo.Config{
 			TemplateMode: false,
 		},
