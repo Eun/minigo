@@ -1,10 +1,6 @@
-# github.com/Eun/yaegi-template v1.3.2
+# github.com/Eun/yaegi-template v1.5.1
 ## explicit
 github.com/Eun/yaegi-template
-# github.com/containous/yaegi v0.8.2
-## explicit
-github.com/containous/yaegi/interp
-github.com/containous/yaegi/stdlib
 # github.com/google/go-cmp v0.4.0
 ## explicit
 github.com/google/go-cmp/cmp
@@ -25,6 +21,12 @@ github.com/ompluscator/dynamic-struct
 github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.3
 github.com/spf13/pflag
+# github.com/traefik/yaegi v0.9.2
+## explicit
+github.com/traefik/yaegi/interp
+github.com/traefik/yaegi/stdlib
+# go.uber.org/atomic v1.7.0
+go.uber.org/atomic
 # golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
 ## explicit
 golang.org/x/xerrors

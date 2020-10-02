@@ -12,9 +12,9 @@ import (
 	"reflect"
 
 	yaegi_template "github.com/Eun/yaegi-template"
-	"github.com/containous/yaegi/interp"
-	"github.com/containous/yaegi/stdlib"
 	dynamicstruct "github.com/ompluscator/dynamic-struct"
+	"github.com/traefik/yaegi/interp"
+	"github.com/traefik/yaegi/stdlib"
 	"golang.org/x/xerrors"
 )
 
