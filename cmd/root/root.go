@@ -8,10 +8,11 @@ import (
 
 	"io"
 
-	"github.com/Eun/minigo/pkg/minigo"
 	"github.com/hjson/hjson-go"
 	"github.com/spf13/cobra"
 	"golang.org/x/xerrors"
+
+	"github.com/Eun/minigo/pkg/minigo"
 )
 
 var (

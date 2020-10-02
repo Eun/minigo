@@ -5,8 +5,9 @@ import (
 
 	"reflect"
 
-	"github.com/Eun/minigo/pkg/minigo"
 	"github.com/google/go-cmp/cmp"
+
+	"github.com/Eun/minigo/pkg/minigo"
 )
 
 func structEqual(a, b interface{}) bool {
