@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/Eun/minigo/minigo"
+	"github.com/Eun/minigo/pkg/minigo"
 )
 
 func runTest(t *testing.T, config minigo.Config, context interface{}, input, expected string) {
