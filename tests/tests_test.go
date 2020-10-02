@@ -3,7 +3,7 @@ package tests
 import (
 	"testing"
 
-	"github.com/Eun/minigo/minigo"
+	"github.com/Eun/minigo/pkg/minigo"
 )
 
 func TestSimple(t *testing.T) {

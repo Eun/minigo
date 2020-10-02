@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/Eun/minigo/minigo"
+	"github.com/Eun/minigo/pkg/minigo"
 )
 
-func runTest(t *testing.T, config minigo.Config, context interface{}, input string, expected string) {
+func runTest(t *testing.T, config minigo.Config, context interface{}, input, expected string) {
 	g, err := minigo.New(config)
 	if err != nil {
 		t.Fatal(err)

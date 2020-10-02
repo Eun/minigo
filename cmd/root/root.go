@@ -8,10 +8,11 @@ import (
 
 	"io"
 
-	"github.com/Eun/minigo/minigo"
 	"github.com/hjson/hjson-go"
 	"github.com/spf13/cobra"
 	"golang.org/x/xerrors"
+
+	"github.com/Eun/minigo/pkg/minigo"
 )
 
 var (
@@ -29,21 +30,18 @@ https://github.com/Eun/minigo`,
 	contextFlag    string
 )
 
-func init() {
+// Execute executes the root cmd.
+func Execute() {
 	rootCmd.Flags().BoolVarP(&templatingFlag, "template", "t", false, "enable templating")
 	rootCmd.Flags().StringVarP(&writeToFlag, "out", "o", "", "write output to file")
 	rootCmd.Flags().StringVarP(&contextFlag, "context", "c", "", "set context to the specified json object")
-}
-
-// Execute executes the root cmd
-func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		_, _ = fmt.Fprint(os.Stderr, err.Error())
 		os.Exit(1)
 	}
 }
 
-// Version sets the rootCmd version to the specified value
+// Version sets the rootCmd version to the specified value.
 func Version(version string) {
 	rootCmd.Version = version
 }
