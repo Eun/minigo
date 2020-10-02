@@ -1,6 +1,6 @@
 package world
 
-// World prints "World"
+// World prints "World".
 func World() string {
 	return "World"
 }

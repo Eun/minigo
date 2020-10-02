@@ -5,7 +5,7 @@ import (
 
 	"reflect"
 
-	"github.com/Eun/minigo/minigo"
+	"github.com/Eun/minigo/pkg/minigo"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -65,9 +65,9 @@ func TestStructEqual(t *testing.T) {
 		},
 		{
 			&struct {
-				Id int
+				ID int
 			}{
-				Id: 10,
+				ID: 10,
 			},
 			&struct {
 				Name string
@@ -79,10 +79,10 @@ func TestStructEqual(t *testing.T) {
 
 		{
 			&struct {
-				Id   int
+				ID   int
 				Name string
 			}{
-				Id:   10,
+				ID:   10,
 				Name: "Joe",
 			},
 			&struct {
@@ -112,25 +112,25 @@ func TestConvertMapToStruct(t *testing.T) {
 	}{
 		{
 			"simple",
-			map[string]interface{}{"Name": "Joe", "Id": 10},
+			map[string]interface{}{"Name": "Joe", "ID": 10},
 			&struct {
-				Id   int
+				ID   int
 				Name string
 			}{
-				Id:   10,
+				ID:   10,
 				Name: "Joe",
 			},
 			false,
 		},
 		{
 			"slice",
-			map[string]interface{}{"Name": "Joe", "Id": 10, "Roles": []string{"Admin", "Developer"}},
+			map[string]interface{}{"Name": "Joe", "ID": 10, "Roles": []string{"Admin", "Developer"}},
 			&struct {
-				Id    int
+				ID    int
 				Name  string
 				Roles []string
 			}{
-				Id:    10,
+				ID:    10,
 				Name:  "Joe",
 				Roles: []string{"Admin", "Developer"},
 			},
@@ -138,15 +138,15 @@ func TestConvertMapToStruct(t *testing.T) {
 		},
 		{
 			"nested",
-			map[string]interface{}{"Name": "Joe", "Id": 10, "Details": map[string]interface{}{"Country": "US"}},
+			map[string]interface{}{"Name": "Joe", "ID": 10, "Details": map[string]interface{}{"Country": "US"}},
 			&struct {
-				Id      int
+				ID      int
 				Name    string
 				Details struct {
 					Country string
 				}
 			}{
-				Id:   10,
+				ID:   10,
 				Name: "Joe",
 				Details: struct {
 					Country string
