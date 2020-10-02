@@ -4,8 +4,6 @@ on:
   push:
     tags:
     - '*'
-  repository_dispatch:
-    types: [version-bumped]
 
 jobs:
   goreleaser:
