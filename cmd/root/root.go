@@ -12,17 +12,20 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/xerrors"
 
+	"io/ioutil"
+
+	"bytes"
+
 	"github.com/Eun/minigo/pkg/minigo"
 )
 
 var (
 	rootCmd = &cobra.Command{
-		Use:   "minigo [flags] <.go files to run>",
+		Use:   "minigo [flags] [.go files to run]",
 		Short: "A mini golang interpreter",
 		Long: `A mini golang interpreter based on yaegi-template and yaegi.
 https://github.com/Eun/minigo`,
 		RunE: run,
-		Args: cobra.MinimumNArgs(1),
 	}
 
 	templatingFlag bool
@@ -62,16 +65,25 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	amountOfGoFiles := len(args)
-	if amountOfGoFiles <= 0 {
-		return nil
-	}
-
 	g, err := minigo.New(minigo.Config{
 		TemplateMode: templatingFlag,
 	})
 	if err != nil {
 		return xerrors.Errorf("unable to create minigo instance: %w", err)
+	}
+
+	amountOfGoFiles := len(args)
+	if amountOfGoFiles <= 0 {
+		// read from stdin
+		buf, err := ioutil.ReadAll(os.Stdin)
+		if err != nil {
+			return xerrors.Errorf("unable to read stdin: %v", err)
+		}
+		err = g.Run(bytes.NewReader(buf), context, w)
+		if err != nil {
+			return xerrors.Errorf("unable to exec from stdin: %v", err)
+		}
+		return nil
 	}
 
 	for _, s := range args {
