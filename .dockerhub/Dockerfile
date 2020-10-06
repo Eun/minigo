@@ -12,4 +12,4 @@ RUN go build -ldflags "-X main.version=$SOURCE_BRANCH -X main.commit=$SOURCE_COM
 
 FROM gcr.io/distroless/base
 COPY --from=build-env /go/bin/minigo /
-CMD ["/minigo"]
+ENTRYPOINT ["/minigo"]
