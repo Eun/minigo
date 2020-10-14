@@ -28,11 +28,11 @@ https://github.com/Eun/minigo`,
 		RunE: run,
 	}
 
-	templatingFlag bool
-	writeToFlag    string
-	contextFlag    string
+	templatingFlag    bool
+	writeToFlag       string
+	contextFlag       string
 	startSequenceFlag string
-	endSequenceFlag string
+	endSequenceFlag   string
 )
 
 // Execute executes the root cmd.
@@ -75,7 +75,7 @@ func run(cmd *cobra.Command, args []string) error {
 
 	g, err := minigo.New(minigo.Config{
 		StartTokens: []rune(startSequenceFlag),
-		EndTokens: []rune(endSequenceFlag),
+		EndTokens:   []rune(endSequenceFlag),
 	})
 	if err != nil {
 		return xerrors.Errorf("unable to create minigo instance: %w", err)

@@ -21,7 +21,7 @@ import (
 // Config holds configuration values for Minigo.
 type Config struct {
 	StartTokens []rune
-	EndTokens []rune
+	EndTokens   []rune
 }
 
 // Minigo can be used to run .go files.
@@ -64,7 +64,6 @@ func (minigo *Minigo) Run(src io.ReadSeeker, context interface{}, output io.Writ
 	if _, err := t.Exec(output, context); err != nil {
 		return xerrors.Errorf("unable to exec source: %w", err)
 	}
-
 	return nil
 }
 
