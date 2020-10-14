@@ -10,7 +10,7 @@ func TestSimple(t *testing.T) {
 	runTest(t,
 		minigo.Config{
 			StartTokens: []rune{},
-			EndTokens: []rune{},
+			EndTokens:   []rune{},
 		},
 		struct{ Name string }{"Joe"},
 		`fmt.Printf("Hello %s", context.Name)`,
@@ -22,7 +22,7 @@ func TestAdvanced(t *testing.T) {
 	runTest(t,
 		minigo.Config{
 			StartTokens: []rune{},
-			EndTokens: []rune{},
+			EndTokens:   []rune{},
 		},
 		struct{ Name string }{"Joe"},
 		`package main
@@ -45,7 +45,7 @@ func TestImport(t *testing.T) {
 	runTest(t,
 		minigo.Config{
 			StartTokens: []rune{},
-			EndTokens: []rune{},
+			EndTokens:   []rune{},
 		},
 		struct{ Name string }{"Joe"},
 		`package main
@@ -64,7 +64,7 @@ func TestTemplate(t *testing.T) {
 	runTest(t,
 		minigo.Config{
 			StartTokens: []rune("<$"),
-			EndTokens: []rune("$>"),
+			EndTokens:   []rune("$>"),
 		},
 		struct{ Name string }{"Joe"},
 		`Hello <$ fmt.Println(context.Name) $>`,
@@ -76,7 +76,7 @@ func TestShebangSkip(t *testing.T) {
 	runTest(t,
 		minigo.Config{
 			StartTokens: []rune{},
-			EndTokens: []rune{},
+			EndTokens:   []rune{},
 		},
 		struct{ Name string }{"Joe"},
 		`#!panic("THIS SHOULD BE IGNORED")
