@@ -1,6 +1,7 @@
-# github.com/Eun/yaegi-template v1.5.1
+# github.com/Eun/yaegi-template v1.5.3
 ## explicit
 github.com/Eun/yaegi-template
+github.com/Eun/yaegi-template/codebuffer
 # github.com/google/go-cmp v0.4.0
 ## explicit
 github.com/google/go-cmp/cmp

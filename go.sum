@@ -4,6 +4,8 @@ github.com/Eun/yaegi-template v1.3.2 h1:Ej79YAJc1CjWRzEEC8rPj7FdaO73/GozrawC8Xa/
 github.com/Eun/yaegi-template v1.3.2/go.mod h1:8kxKtnQY/UHHcSsfePmpIXslGoXe9lZZHR9AZqrfBsU=
 github.com/Eun/yaegi-template v1.5.1 h1:Seri47lg1Wz7V2YHQUNlVmFZDUNz47/jfL6HQoWU+6w=
 github.com/Eun/yaegi-template v1.5.1/go.mod h1:ZFqMTQyKv7c/iJuz2V5xE4qoJ8xbnmDOvIsQqETBuYE=
+github.com/Eun/yaegi-template v1.5.3 h1:sBP+Bq5rzwb+csL3M09eGtRbL080qubPnCK/IEuLIS0=
+github.com/Eun/yaegi-template v1.5.3/go.mod h1:X42JNqmAvx17EKZ8S1dgpEDaz894+9fFgvj1DOmRxNk=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=

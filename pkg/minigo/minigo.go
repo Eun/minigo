@@ -38,11 +38,6 @@ func New(config Config) (*Minigo, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	t.StartTokens = config.StartTokens
-	t.EndTokens = config.EndTokens
-
-
 	return &Minigo{
 		t:      t,
 		config: config,
@@ -54,6 +49,9 @@ func (minigo *Minigo) Run(src io.ReadSeeker, context interface{}, output io.Writ
 	t := yaegi_template.MustNew(interp.Options{
 		GoPath: os.Getenv("GOPATH"),
 	}, stdlib.Symbols)
+
+	t.StartTokens = minigo.config.StartTokens
+	t.EndTokens = minigo.config.EndTokens
 
 	if err := skipShebang(src); err != nil {
 		return xerrors.Errorf("unable to skip shebang: %w", err)
