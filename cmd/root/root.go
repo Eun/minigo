@@ -28,9 +28,11 @@ https://github.com/Eun/minigo`,
 		RunE: run,
 	}
 
-	templatingFlag bool
-	writeToFlag    string
-	contextFlag    string
+	templatingFlag    bool
+	writeToFlag       string
+	contextFlag       string
+	startSequenceFlag string
+	endSequenceFlag   string
 )
 
 // Execute executes the root cmd.
@@ -38,6 +40,8 @@ func Execute() {
 	rootCmd.Flags().BoolVarP(&templatingFlag, "template", "t", false, "enable templating")
 	rootCmd.Flags().StringVarP(&writeToFlag, "out", "o", "", "write output to file")
 	rootCmd.Flags().StringVarP(&contextFlag, "context", "c", "", "set context to the specified json object")
+	rootCmd.Flags().StringVarP(&startSequenceFlag, "start-template", "", "<$", "start sequence that marks the start of code")
+	rootCmd.Flags().StringVarP(&endSequenceFlag, "end-template", "", "$>", "end sequence that marks the end of code")
 	if err := rootCmd.Execute(); err != nil {
 		_, _ = fmt.Fprint(os.Stderr, err.Error())
 		os.Exit(1)
@@ -65,8 +69,13 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	if !templatingFlag {
+		startSequenceFlag, endSequenceFlag = "", ""
+	}
+
 	g, err := minigo.New(minigo.Config{
-		TemplateMode: templatingFlag,
+		StartTokens: []rune(startSequenceFlag),
+		EndTokens:   []rune(endSequenceFlag),
 	})
 	if err != nil {
 		return xerrors.Errorf("unable to create minigo instance: %w", err)

@@ -9,7 +9,8 @@ import (
 func TestSimple(t *testing.T) {
 	runTest(t,
 		minigo.Config{
-			TemplateMode: false,
+			StartTokens: []rune{},
+			EndTokens:   []rune{},
 		},
 		struct{ Name string }{"Joe"},
 		`fmt.Printf("Hello %s", context.Name)`,
@@ -20,7 +21,8 @@ func TestSimple(t *testing.T) {
 func TestAdvanced(t *testing.T) {
 	runTest(t,
 		minigo.Config{
-			TemplateMode: false,
+			StartTokens: []rune{},
+			EndTokens:   []rune{},
 		},
 		struct{ Name string }{"Joe"},
 		`package main
@@ -42,7 +44,8 @@ func main() {
 func TestImport(t *testing.T) {
 	runTest(t,
 		minigo.Config{
-			TemplateMode: false,
+			StartTokens: []rune{},
+			EndTokens:   []rune{},
 		},
 		struct{ Name string }{"Joe"},
 		`package main
@@ -60,7 +63,8 @@ func main() {
 func TestTemplate(t *testing.T) {
 	runTest(t,
 		minigo.Config{
-			TemplateMode: true,
+			StartTokens: []rune("<$"),
+			EndTokens:   []rune("$>"),
 		},
 		struct{ Name string }{"Joe"},
 		`Hello <$ fmt.Println(context.Name) $>`,
@@ -71,7 +75,8 @@ func TestTemplate(t *testing.T) {
 func TestShebangSkip(t *testing.T) {
 	runTest(t,
 		minigo.Config{
-			TemplateMode: false,
+			StartTokens: []rune{},
+			EndTokens:   []rune{},
 		},
 		struct{ Name string }{"Joe"},
 		`#!panic("THIS SHOULD BE IGNORED")

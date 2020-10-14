@@ -20,7 +20,8 @@ import (
 
 // Config holds configuration values for Minigo.
 type Config struct {
-	TemplateMode bool
+	StartTokens []rune
+	EndTokens   []rune
 }
 
 // Minigo can be used to run .go files.
@@ -37,10 +38,6 @@ func New(config Config) (*Minigo, error) {
 	if err != nil {
 		return nil, err
 	}
-	if !config.TemplateMode {
-		t.StartTokens = []rune{}
-		t.EndTokens = []rune{}
-	}
 	return &Minigo{
 		t:      t,
 		config: config,
@@ -52,10 +49,9 @@ func (minigo *Minigo) Run(src io.ReadSeeker, context interface{}, output io.Writ
 	t := yaegi_template.MustNew(interp.Options{
 		GoPath: os.Getenv("GOPATH"),
 	}, stdlib.Symbols)
-	if !minigo.config.TemplateMode {
-		t.StartTokens = []rune{}
-		t.EndTokens = []rune{}
-	}
+
+	t.StartTokens = minigo.config.StartTokens
+	t.EndTokens = minigo.config.EndTokens
 
 	if err := skipShebang(src); err != nil {
 		return xerrors.Errorf("unable to skip shebang: %w", err)
@@ -68,7 +64,6 @@ func (minigo *Minigo) Run(src io.ReadSeeker, context interface{}, output io.Writ
 	if _, err := t.Exec(output, context); err != nil {
 		return xerrors.Errorf("unable to exec source: %w", err)
 	}
-
 	return nil
 }
 

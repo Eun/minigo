@@ -3,7 +3,7 @@ module github.com/Eun/minigo
 go 1.14
 
 require (
-	github.com/Eun/yaegi-template v1.5.1
+	github.com/Eun/yaegi-template v1.5.3
 	github.com/google/go-cmp v0.4.0
 	github.com/hjson/hjson-go v3.0.1+incompatible
 	github.com/ompluscator/dynamic-struct v1.2.0
