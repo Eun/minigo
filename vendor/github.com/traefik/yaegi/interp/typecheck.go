@@ -91,7 +91,10 @@ func (check typecheck) addressExpr(n *node) error {
 		case selectorExpr:
 			c0 = c0.child[1]
 			continue
-		case indexExpr:
+		case starExpr:
+			c0 = c0.child[0]
+			continue
+		case indexExpr, sliceExpr:
 			c := c0.child[0]
 			if isArray(c.typ) || isMap(c.typ) {
 				c0 = c
@@ -101,7 +104,7 @@ func (check typecheck) addressExpr(n *node) error {
 			found = true
 			continue
 		}
-		return n.cfgErrorf("invalid operation: cannot take address of %s", c0.typ.id())
+		return n.cfgErrorf("invalid operation: cannot take address of %s [kind: %s]", c0.typ.id(), kinds[c0.kind])
 	}
 	return nil
 }
@@ -148,7 +151,7 @@ func (check typecheck) shift(n *node) error {
 	t0, t1 := c0.typ.TypeOf(), c1.typ.TypeOf()
 
 	var v0 constant.Value
-	if c0.typ.untyped {
+	if c0.typ.untyped && c0.rval.IsValid() {
 		v0 = constant.ToInt(c0.rval.Interface().(constant.Value))
 		c0.rval = reflect.ValueOf(v0)
 	}
@@ -483,7 +486,7 @@ func (check typecheck) sliceExpr(n *node) error {
 	case reflect.Array:
 		valid = true
 		l = t.Len()
-		if c.kind != selectorExpr && (c.sym == nil || c.sym.kind != varSym) {
+		if c.kind != indexExpr && c.kind != selectorExpr && (c.sym == nil || c.sym.kind != varSym) {
 			return c.cfgErrorf("cannot slice type %s", c.typ.id())
 		}
 	case reflect.Slice:
@@ -1040,24 +1043,10 @@ func (check typecheck) convertUntyped(n *node, typ *itype) error {
 		return convErr
 	}
 
-	isFloatToIntDivision := false
 	if err := check.representable(n, rtyp); err != nil {
-		if !isInt(rtyp) || n.action != aQuo {
-			return err
-		}
-		// retry in the case of a division, and pretend we want a float. Because if we
-		// can represent a float, then it follows that we can represent the integer
-		// part of that float as an int.
-		if err := check.representable(n, reflect.TypeOf(1.0)); err != nil {
-			return err
-		}
-		isFloatToIntDivision = true
+		return err
 	}
-	if isFloatToIntDivision {
-		n.rval, err = check.convertConstFloatToInt(n.rval)
-	} else {
-		n.rval, err = check.convertConst(n.rval, rtyp)
-	}
+	n.rval, err = check.convertConst(n.rval, rtyp)
 	if err != nil {
 		if errors.Is(err, errCantConvert) {
 			return convErr
@@ -1097,22 +1086,6 @@ func (check typecheck) representable(n *node, t reflect.Type) error {
 		return n.cfgErrorf("cannot convert %s to %s", c.ExactString(), t.Kind().String())
 	}
 	return nil
-}
-
-func (check typecheck) convertConstFloatToInt(v reflect.Value) (reflect.Value, error) {
-	if !v.IsValid() {
-		return v, errors.New("invalid float reflect value")
-	}
-	c, ok := v.Interface().(constant.Value)
-	if !ok {
-		return v, errors.New("unexpected non-constant value")
-	}
-
-	if constant.ToFloat(c).Kind() != constant.Float {
-		return v, errors.New("const value cannot be converted to float")
-	}
-	fl, _ := constant.Float64Val(c)
-	return reflect.ValueOf(int(fl)).Convert(reflect.TypeOf(1.0)), nil
 }
 
 func (check typecheck) convertConst(v reflect.Value, t reflect.Type) (reflect.Value, error) {
