@@ -166,56 +166,68 @@ func nodeType(interp *Interpreter, sc *scope, n *node) (*itype, error) {
 
 	case arrayType:
 		t.cat = arrayT
-		if len(n.child) > 1 {
-			v := n.child[0].rval
-			switch {
-			case v.IsValid():
-				// constant size
-				if isConstantValue(v.Type()) {
-					c := v.Interface().(constant.Value)
-					t.size = constToInt(c)
-				} else {
-					t.size = int(v.Int())
-				}
-			case n.child[0].kind == ellipsisExpr:
-				// [...]T expression
-				t.size = arrayTypeLen(n.anc)
-			default:
-				if sym, _, ok := sc.lookup(n.child[0].ident); ok {
-					if sym.kind != constSym {
-						return nil, n.child[0].cfgErrorf("non-constant array bound %q", n.child[0].ident)
-					}
-					// Resolve symbol to get size value
-					if sym.typ != nil && sym.typ.cat == intT {
-						if v, ok := sym.rval.Interface().(int); ok {
-							t.size = v
-						} else if c, ok := sym.rval.Interface().(constant.Value); ok {
-							t.size = constToInt(c)
-						} else {
-							t.incomplete = true
-						}
-					} else {
-						t.incomplete = true
-					}
-				} else {
-					// Evaluate constant array size expression
-					if _, err = interp.cfg(n.child[0], sc.pkgID); err != nil {
-						return nil, err
-					}
-					t.incomplete = true
-				}
-			}
-			if t.val, err = nodeType(interp, sc, n.child[1]); err != nil {
-				return nil, err
-			}
-			t.sizedef = true
-			t.incomplete = t.incomplete || t.val.incomplete
-		} else {
-			if t.val, err = nodeType(interp, sc, n.child[0]); err != nil {
+		c0 := n.child[0]
+		if len(n.child) == 1 {
+			// Array size is not defined.
+			if t.val, err = nodeType(interp, sc, c0); err != nil {
 				return nil, err
 			}
 			t.incomplete = t.val.incomplete
+			break
 		}
+		// Array size is defined.
+		switch v := c0.rval; {
+		case v.IsValid():
+			// Size if defined by a constant litteral value.
+			if isConstantValue(v.Type()) {
+				c := v.Interface().(constant.Value)
+				t.size = constToInt(c)
+			} else {
+				t.size = int(v.Int())
+			}
+		case c0.kind == ellipsisExpr:
+			// [...]T expression, get size from the length of composite array.
+			t.size = arrayTypeLen(n.anc)
+		case c0.kind == identExpr:
+			sym, _, ok := sc.lookup(c0.ident)
+			if !ok {
+				t.incomplete = true
+				break
+			}
+			// Size is defined by a symbol which must be a constant integer.
+			if sym.kind != constSym {
+				return nil, c0.cfgErrorf("non-constant array bound %q", c0.ident)
+			}
+			if sym.typ == nil || sym.typ.cat != intT {
+				t.incomplete = true
+				break
+			}
+			if v, ok := sym.rval.Interface().(int); ok {
+				t.size = v
+				break
+			}
+			if c, ok := sym.rval.Interface().(constant.Value); ok {
+				t.size = constToInt(c)
+				break
+			}
+			t.incomplete = true
+		default:
+			// Size is defined by a numeric constant expression.
+			if _, err = interp.cfg(c0, sc.pkgID); err != nil {
+				return nil, err
+			}
+			v, ok := c0.rval.Interface().(constant.Value)
+			if !ok {
+				t.incomplete = true
+				break
+			}
+			t.size = constToInt(v)
+		}
+		if t.val, err = nodeType(interp, sc, n.child[1]); err != nil {
+			return nil, err
+		}
+		t.sizedef = true
+		t.incomplete = t.incomplete || t.val.incomplete
 
 	case basicLit:
 		switch v := n.rval.Interface().(type) {
@@ -550,7 +562,6 @@ func nodeType(interp *Interpreter, sc *scope, n *node) (*itype, error) {
 				}
 			} else {
 				err = n.cfgErrorf("undefined selector %s.%s", lt.path, name)
-				panic(err)
 			}
 		case srcPkgT:
 			pkg := interp.srcPkg[lt.path]
@@ -915,7 +926,23 @@ func (t *itype) assignableTo(o *itype) bool {
 	if t.isNil() && o.hasNil() || o.isNil() && t.hasNil() {
 		return true
 	}
-	return t.TypeOf().AssignableTo(o.TypeOf())
+
+	if t.TypeOf().AssignableTo(o.TypeOf()) {
+		return true
+	}
+
+	n := t.node
+	if n == nil || !n.rval.IsValid() {
+		return false
+	}
+	con, ok := n.rval.Interface().(constant.Value)
+	if !ok {
+		return false
+	}
+	if con == nil || !isConstType(o) {
+		return false
+	}
+	return representableConst(con, o.TypeOf())
 }
 
 // convertibleTo returns true if t is convertible to o.
@@ -924,7 +951,7 @@ func (t *itype) convertibleTo(o *itype) bool {
 		return true
 	}
 
-	// unsafe checkes
+	// unsafe checks
 	tt, ot := t.TypeOf(), o.TypeOf()
 	if (tt.Kind() == reflect.Ptr || tt.Kind() == reflect.Uintptr) && ot.Kind() == reflect.UnsafePointer {
 		return true
@@ -1180,7 +1207,11 @@ func (t *itype) lookupBinField(name string) (s reflect.StructField, index []int,
 	if !isStruct(t) {
 		return
 	}
-	s, ok = t.TypeOf().FieldByName(name)
+	rt := t.rtype
+	if t.cat == valueT && rt.Kind() == reflect.Ptr {
+		rt = rt.Elem()
+	}
+	s, ok = rt.FieldByName(name)
 	if !ok {
 		for i, f := range t.field {
 			if f.embed {

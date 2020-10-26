@@ -701,7 +701,16 @@ func quoConst(n *node) {
 	n.rval = reflect.New(t).Elem()
 	switch {
 	case isConst:
-		v := constant.BinaryOp(vConstantValue(v0), token.QUO, vConstantValue(v1))
+		var operator token.Token
+		// When the result of the operation is expected to be an int (because both
+		// operands are ints), we want to force the type of the whole expression to be an
+		// int (and not a float), which is achieved by using the QUO_ASSIGN operator.
+		if n.typ.untyped && isInt(n.typ.rtype) {
+			operator = token.QUO_ASSIGN
+		} else {
+			operator = token.QUO
+		}
+		v := constant.BinaryOp(vConstantValue(v0), operator, vConstantValue(v1))
 		n.rval.Set(reflect.ValueOf(v))
 	case isComplex(t):
 		n.rval.SetComplex(vComplex(v0) / vComplex(v1))
@@ -1957,10 +1966,10 @@ func bitNotConst(n *node) {
 	case isConst:
 		v := constant.UnaryOp(token.XOR, vConstantValue(v0), 0)
 		n.rval.Set(reflect.ValueOf(v))
-	case isInt(t):
-		n.rval.SetInt(^v0.Int())
 	case isUint(t):
 		n.rval.SetUint(^v0.Uint())
+	case isInt(t):
+		n.rval.SetInt(^v0.Int())
 	}
 }
 
@@ -1976,10 +1985,10 @@ func negConst(n *node) {
 	case isConst:
 		v := constant.UnaryOp(token.SUB, vConstantValue(v0), 0)
 		n.rval.Set(reflect.ValueOf(v))
-	case isInt(t):
-		n.rval.SetInt(-v0.Int())
 	case isUint(t):
 		n.rval.SetUint(-v0.Uint())
+	case isInt(t):
+		n.rval.SetInt(-v0.Int())
 	case isFloat(t):
 		n.rval.SetFloat(-v0.Float())
 	case isComplex(t):
@@ -2015,10 +2024,10 @@ func posConst(n *node) {
 	case isConst:
 		v := constant.UnaryOp(token.ADD, vConstantValue(v0), 0)
 		n.rval.Set(reflect.ValueOf(v))
-	case isInt(t):
-		n.rval.SetInt(+v0.Int())
 	case isUint(t):
 		n.rval.SetUint(+v0.Uint())
+	case isInt(t):
+		n.rval.SetInt(+v0.Int())
 	case isFloat(t):
 		n.rval.SetFloat(+v0.Float())
 	case isComplex(t):
