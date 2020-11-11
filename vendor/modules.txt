@@ -1,4 +1,4 @@
-# github.com/Eun/yaegi-template v1.5.5
+# github.com/Eun/yaegi-template v1.5.7
 ## explicit
 github.com/Eun/yaegi-template
 github.com/Eun/yaegi-template/codebuffer
@@ -22,7 +22,7 @@ github.com/ompluscator/dynamic-struct
 github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.3
 github.com/spf13/pflag
-# github.com/traefik/yaegi v0.9.4
+# github.com/traefik/yaegi v0.9.5
 ## explicit
 github.com/traefik/yaegi/interp
 github.com/traefik/yaegi/stdlib
