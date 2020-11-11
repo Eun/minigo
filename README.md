@@ -10,6 +10,12 @@ fmt.Println("Hello World")
 
 > Note that _minigo_ comes with a go runtime, you don't have to install go!
 
+## Use docker!
+```go
+#!/usr/bin/env -S docker run -ti -v ${PWD}:/app/ -w /app --rm eunts/minigo:latest
+fmt.Println("Hello World")
+```
+
 ## Installation
 Download and install from the [Relases Page](https://github.com/Eun/minigo/releases).
 Or compile it yourself using `go`
