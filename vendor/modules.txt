@@ -1,4 +1,4 @@
-# github.com/Eun/yaegi-template v1.5.10
+# github.com/Eun/yaegi-template v1.5.14
 ## explicit
 github.com/Eun/yaegi-template
 github.com/Eun/yaegi-template/codebuffer
@@ -17,12 +17,14 @@ github.com/inconshreveable/mousetrap
 # github.com/ompluscator/dynamic-struct v1.2.0
 ## explicit
 github.com/ompluscator/dynamic-struct
+# github.com/pkg/errors v0.9.1
+github.com/pkg/errors
 # github.com/spf13/cobra v1.1.1
 ## explicit
 github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.5
 github.com/spf13/pflag
-# github.com/traefik/yaegi v0.9.7
+# github.com/traefik/yaegi v0.9.8
 ## explicit
 github.com/traefik/yaegi/interp
 github.com/traefik/yaegi/stdlib
