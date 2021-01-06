@@ -5,7 +5,7 @@ A mini golang interpreter based on [yaegi-template](https://github.com/Eun/yaegi
 ## Usage
 ```go
 #!/usr/bin/env minigo
-fmt.Println("Hello World")
+println("Hello World")
 ```
 
 > Note that _minigo_ comes with a go runtime, you don't have to install go!
@@ -13,7 +13,7 @@ fmt.Println("Hello World")
 ## Use docker!
 ```go
 #!/usr/bin/env -S docker run -ti -v ${PWD}:/app/ -w /app --rm eunts/minigo:latest
-fmt.Println("Hello World")
+println("Hello World")
 ```
 
 ## Installation
