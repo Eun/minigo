@@ -5,8 +5,15 @@ import (
 	"reflect"
 )
 
+const (
+	notInFrame  = -1 // value of node.findex for literal values (not in frame)
+	globalFrame = -1 // value of node.level for global symbols
+)
+
 func valueGenerator(n *node, i int) func(*frame) reflect.Value {
 	switch n.level {
+	case globalFrame:
+		return func(f *frame) reflect.Value { return valueOf(f.root.data, i) }
 	case 0:
 		return func(f *frame) reflect.Value { return valueOf(f.data, i) }
 	case 1:
@@ -33,6 +40,30 @@ func valueOf(data []reflect.Value, i int) reflect.Value {
 	return reflect.Value{}
 }
 
+func genValueBinMethodOnInterface(n *node, defaultGen func(*frame) reflect.Value) func(*frame) reflect.Value {
+	if n == nil || n.child == nil || n.child[0] == nil ||
+		n.child[0].child == nil || n.child[0].child[0] == nil {
+		return defaultGen
+	}
+	if n.child[0].child[1] == nil || n.child[0].child[1].ident == "" {
+		return defaultGen
+	}
+	value0 := genValue(n.child[0].child[0])
+
+	return func(f *frame) reflect.Value {
+		val, ok := value0(f).Interface().(valueInterface)
+		if !ok {
+			return defaultGen(f)
+		}
+		typ := val.node.typ
+		if typ.node != nil || typ.cat != valueT {
+			return defaultGen(f)
+		}
+		meth, _ := typ.rtype.MethodByName(n.child[0].child[1].ident)
+		return meth.Func
+	}
+}
+
 func genValueRecvIndirect(n *node) func(*frame) reflect.Value {
 	v := genValueRecv(n)
 	return func(f *frame) reflect.Value { return v(f).Elem() }
@@ -42,6 +73,35 @@ func genValueRecv(n *node) func(*frame) reflect.Value {
 	v := genValue(n.recv.node)
 	fi := n.recv.index
 
+	if len(fi) == 0 {
+		return v
+	}
+
+	return func(f *frame) reflect.Value {
+		r := v(f)
+		if r.Kind() == reflect.Ptr {
+			r = r.Elem()
+		}
+		return r.FieldByIndex(fi)
+	}
+}
+
+func genValueBinRecv(n *node, recv *receiver) func(*frame) reflect.Value {
+	value := genValue(n)
+	binValue := genValue(recv.node)
+
+	v := func(f *frame) reflect.Value {
+		if def, ok := value(f).Interface().(*node); ok {
+			if def != nil && def.recv != nil && def.recv.val.IsValid() {
+				return def.recv.val
+			}
+		}
+
+		ival, _ := binValue(f).Interface().(valueInterface)
+		return ival.value
+	}
+
+	fi := recv.index
 	if len(fi) == 0 {
 		return v
 	}
@@ -118,18 +178,16 @@ func genValue(n *node) func(*frame) reflect.Value {
 			return func(f *frame) reflect.Value { return v }
 		}
 		if n.sym != nil {
-			if n.sym.index < 0 {
+			i := n.sym.index
+			if i < 0 {
 				return genValue(n.sym.node)
 			}
-			i := n.sym.index
 			if n.sym.global {
-				return func(f *frame) reflect.Value {
-					return n.interp.frame.data[i]
-				}
+				return func(f *frame) reflect.Value { return f.root.data[i] }
 			}
 			return valueGenerator(n, i)
 		}
-		if n.findex < 0 {
+		if n.findex == notInFrame {
 			var v reflect.Value
 			if w, ok := n.val.(reflect.Value); ok {
 				v = w
@@ -244,6 +302,17 @@ func genValueOutput(n *node, t reflect.Type) func(*frame) reflect.Value {
 	return value
 }
 
+func valueInterfaceValue(v reflect.Value) reflect.Value {
+	for {
+		vv, ok := v.Interface().(valueInterface)
+		if !ok {
+			break
+		}
+		v = vv.value
+	}
+	return v
+}
+
 func genValueInterfaceValue(n *node) func(*frame) reflect.Value {
 	value := genValue(n)
 
@@ -254,7 +323,7 @@ func genValueInterfaceValue(n *node) func(*frame) reflect.Value {
 			v.Set(zeroInterfaceValue())
 			v = value(f)
 		}
-		return v.Interface().(valueInterface).value
+		return valueInterfaceValue(v)
 	}
 }
 
