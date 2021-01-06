@@ -115,6 +115,7 @@ func (interp *Interpreter) gta(root *node, rpath, importPath string) ([]*node, e
 					sc.sym[c.ident] = &symbol{index: sc.add(n.typ), kind: varSym, global: true, typ: n.typ, node: n}
 					continue
 				}
+				c.level = globalFrame
 
 				// redeclaration error
 				if sym.typ.node != nil && sym.typ.node.anc != nil {
@@ -253,10 +254,11 @@ func (interp *Interpreter) gta(root *node, rpath, importPath string) ([]*node, e
 				return false
 			}
 
-			if n.child[1].kind == identExpr {
+			switch n.child[1].kind {
+			case identExpr, selectorExpr:
 				n.typ = &itype{cat: aliasT, val: typ, name: typeName, path: importPath, field: typ.field, incomplete: typ.incomplete, scope: sc, node: n.child[0]}
 				copy(n.typ.method, typ.method)
-			} else {
+			default:
 				n.typ = typ
 				n.typ.name = typeName
 				n.typ.path = importPath

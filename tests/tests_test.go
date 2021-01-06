@@ -13,7 +13,7 @@ func TestSimple(t *testing.T) {
 			EndTokens:   []rune{},
 		},
 		struct{ Name string }{"Joe"},
-		`fmt.Printf("Hello %s", context.Name)`,
+		`print("Hello " + context.Name)`,
 		"Hello Joe",
 	)
 }
@@ -50,6 +50,7 @@ func TestImport(t *testing.T) {
 		struct{ Name string }{"Joe"},
 		`package main
 
+import "fmt"
 import "./world"
 
 func main() {
@@ -67,7 +68,7 @@ func TestTemplate(t *testing.T) {
 			EndTokens:   []rune("$>"),
 		},
 		struct{ Name string }{"Joe"},
-		`Hello <$ fmt.Println(context.Name) $>`,
+		`Hello <$ println(context.Name) $>`,
 		"Hello Joe\n",
 	)
 }
@@ -80,7 +81,7 @@ func TestShebangSkip(t *testing.T) {
 		},
 		struct{ Name string }{"Joe"},
 		`#!panic("THIS SHOULD BE IGNORED")
-fmt.Println("Hello", context.Name)
+println("Hello " + context.Name)
 `,
 		"Hello Joe\n",
 	)

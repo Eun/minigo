@@ -1,4 +1,4 @@
-# yaegi-template [![Actions Status](https://github.com/Eun/yaegi-template/workflows/CI/badge.svg)](https://github.com/Eun/yaegi-template/actions) [![Codecov](https://img.shields.io/codecov/c/github/Eun/yaegi-template.svg)](https://codecov.io/gh/Eun/yaegi-template) [![GoDoc](https://godoc.org/github.com/Eun/yaegi-template?status.svg)](https://godoc.org/github.com/Eun/yaegi-template) [![go-report](https://goreportcard.com/badge/github.com/Eun/yaegi-template)](https://goreportcard.com/report/github.com/Eun/yaegi-template)
+# yaegi-template [![Actions Status](https://github.com/Eun/yaegi-template/workflows/CI/badge.svg)](https://github.com/Eun/yaegi-template/actions) [![Coverage Status](https://coveralls.io/repos/github/Eun/yaegi-template/badge.svg)](https://coveralls.io/github/Eun/yaegi-template) [![PkgGoDev](https://img.shields.io/badge/pkg.go.dev-reference-blue)](https://pkg.go.dev/github.com/Eun/yaegi-template) [![GoDoc](https://godoc.org/github.com/Eun/yaegi-template?status.svg)](https://godoc.org/github.com/Eun/yaegi-template) [![go-report](https://goreportcard.com/badge/github.com/Eun/yaegi-template)](https://goreportcard.com/report/github.com/Eun/yaegi-template)
 Use [yaegi](https://github.com/traefik/yaegi) as a template engine.
 
 ```go
@@ -8,40 +8,41 @@ import (
 	"os"
 
 	"github.com/Eun/yaegi-template"
-	"github.com/traefik/yaegi/interp"
-	"github.com/traefik/yaegi/stdlib"
 )
 
 func main() {
-	template := yaegi_template.MustNew(interp.Options{}, stdlib.Symbols)
+	template := yaegi_template.MustNew(yaegi_template.DefaultOptions(), yaegi_template.DefaultSymbols()...)
 	template.MustParseString(`
 <html>
 <$
-	import "time"
-	func GreetUser(name string) {
-		fmt.Printf("Hello %s, it is %s", name, time.Now().Format(time.Kitchen))
-	}
+    import (
+        "fmt"
+        "time"
+    )
+    func GreetUser(name string) {
+        fmt.Printf("Hello %s, it is %s", name, time.Now().Format(time.Kitchen))
+    }
 $>
 
 <p>
 <$
-	if context.LoggedIn {
-		GreetUser(context.UserName)
-	}
+    if context.LoggedIn {
+        GreetUser(context.UserName)
+    }
 $>
 </p>
 </html>
 `)
 
-	type Context struct {
-		LoggedIn bool
-		UserName string
-	}
+    type Context struct {
+        LoggedIn bool
+        UserName string
+    }
 
-	template.MustExec(os.Stdout, &Context{
-		LoggedIn: true,
-		UserName: "Joe Doe",
-	})
+    template.MustExec(os.Stdout, &Context{
+        LoggedIn: true,
+        UserName: "Joe Doe",
+    })
 }
 ```
 
