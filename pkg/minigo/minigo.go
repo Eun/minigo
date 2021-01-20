@@ -32,9 +32,7 @@ type Minigo struct {
 
 // New creates a new Minigo instance.
 func New(config Config) (*Minigo, error) {
-	t, err := yaegi_template.New(interp.Options{
-		GoPath: os.Getenv("GOPATH"),
-	}, stdlib.Symbols)
+	t, err := yaegi_template.New(yaegi_template.DefaultOptions(), yaegi_template.DefaultSymbols()...)
 	if err != nil {
 		return nil, err
 	}
