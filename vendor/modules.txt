@@ -1,4 +1,4 @@
-# github.com/Eun/yaegi-template v1.5.17
+# github.com/Eun/yaegi-template v1.5.18
 ## explicit
 github.com/Eun/yaegi-template
 github.com/Eun/yaegi-template/codebuffer
