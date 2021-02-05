@@ -24,7 +24,7 @@ github.com/pkg/errors
 github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.5
 github.com/spf13/pflag
-# github.com/traefik/yaegi v0.9.10
+# github.com/traefik/yaegi v0.9.12
 ## explicit
 github.com/traefik/yaegi/interp
 github.com/traefik/yaegi/stdlib
