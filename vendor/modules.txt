@@ -1,4 +1,4 @@
-# github.com/Eun/yaegi-template v1.5.18
+# github.com/Eun/yaegi-template v1.5.19
 ## explicit
 github.com/Eun/yaegi-template
 github.com/Eun/yaegi-template/codebuffer
@@ -24,7 +24,7 @@ github.com/pkg/errors
 github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.5
 github.com/spf13/pflag
-# github.com/traefik/yaegi v0.9.10
+# github.com/traefik/yaegi v0.9.16
 ## explicit
 github.com/traefik/yaegi/interp
 github.com/traefik/yaegi/stdlib
