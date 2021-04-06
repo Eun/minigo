@@ -1,4 +1,4 @@
-FROM golang:1.14 as build-env
+FROM golang:1.16 as build-env
 
 ARG SOURCE_BRANCH
 ARG SOURCE_COMMIT

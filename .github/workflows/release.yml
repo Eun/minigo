@@ -1,28 +1,16 @@
 name: Release
 on:
-  push:
-    branches:
-      - master
+  release:
+    types: [published]
 jobs:
-  build:
+  release_to_production:
     runs-on: ubuntu-latest
     steps:
       -
-        uses: actions/checkout@master
+        uses: actions/checkout@v2
         with:
-          fetch-depth: '0'
-      -
-        name: Bump version and push tag
-        uses: anothrNick/github-tag-action@1.26.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          WITH_V: true
-          DEFAULT_BUMP: patch
-      -
-        name: Set up Go
-        uses: actions/setup-go@v1
-        with:
-          go-version: 1.14.x
+          fetch-depth: 0
+          ref: production
       -
         name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v1
@@ -32,3 +20,6 @@ jobs:
           key: ${{ secrets.YOUR_PRIVATE_KEY }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+
