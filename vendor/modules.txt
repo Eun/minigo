@@ -14,7 +14,7 @@ github.com/google/go-cmp/cmp/internal/value
 github.com/hjson/hjson-go
 # github.com/inconshreveable/mousetrap v1.0.0
 github.com/inconshreveable/mousetrap
-# github.com/ompluscator/dynamic-struct v1.2.0
+# github.com/ompluscator/dynamic-struct v1.3.0
 ## explicit
 github.com/ompluscator/dynamic-struct
 # github.com/pkg/errors v0.9.1
