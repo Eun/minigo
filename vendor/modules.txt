@@ -1,4 +1,4 @@
-# github.com/Eun/yaegi-template v1.5.19
+# github.com/Eun/yaegi-template v1.6.0
 ## explicit
 github.com/Eun/yaegi-template
 github.com/Eun/yaegi-template/codebuffer
@@ -24,11 +24,11 @@ github.com/pkg/errors
 github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.5
 github.com/spf13/pflag
-# github.com/traefik/yaegi v0.9.16
+# github.com/traefik/yaegi v0.9.21
 ## explicit
 github.com/traefik/yaegi/interp
 github.com/traefik/yaegi/stdlib
-# go.uber.org/atomic v1.7.0
+# go.uber.org/atomic v1.9.0
 go.uber.org/atomic
 # golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
 ## explicit
