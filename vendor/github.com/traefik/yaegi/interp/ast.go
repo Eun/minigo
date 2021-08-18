@@ -357,7 +357,7 @@ func ignoreError(err error, src string) bool {
 }
 
 func wrapInMain(src string) string {
-	return fmt.Sprintf("package main; func main() {%s}", src)
+	return fmt.Sprintf("package main; func main() {%s\n}", src)
 }
 
 // Note: no type analysis is performed at this stage, it is done in pre-order
@@ -680,6 +680,7 @@ func (interp *Interpreter) ast(src, name string, inc bool) (string, *node, error
 
 		case *ast.FuncDecl:
 			n := addChild(&root, anc, pos, funcDecl, aNop)
+			n.val = n
 			if a.Recv == nil {
 				// function is not a method, create an empty receiver list
 				addChild(&root, astNode{n, nod}, pos, fieldList, aNop)
