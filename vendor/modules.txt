@@ -2,7 +2,7 @@
 ## explicit
 github.com/Eun/yaegi-template
 github.com/Eun/yaegi-template/codebuffer
-# github.com/google/go-cmp v0.5.5
+# github.com/google/go-cmp v0.5.7
 ## explicit
 github.com/google/go-cmp/cmp
 github.com/google/go-cmp/cmp/internal/diff
