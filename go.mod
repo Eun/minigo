@@ -8,6 +8,6 @@ require (
 	github.com/hjson/hjson-go v3.3.0+incompatible
 	github.com/ompluscator/dynamic-struct v1.4.0
 	github.com/spf13/cobra v1.7.0
-	github.com/traefik/yaegi v0.9.21
+	github.com/traefik/yaegi v0.15.1
 	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
 )
